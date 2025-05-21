@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoVCoins - Student Waste Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-emerald-50 font-[Poppins]">
+    <div class="min-h-screen">
+        <!-- Main Container -->
+        <div id="mainPage" class="max-w-md mx-auto p-6">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-emerald-600 mb-2">EcoVCoins</h1>
+                <p class="text-gray-600">Convert your waste into rewards!</p>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div class="mb-4">
+                    <label for="usn" class="block text-gray-700 mb-2">Enter your USN</label>
+                    <input type="text" id="usn" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="4VV23EC001">
+                </div>
+                <button onclick="submitWaste()" class="w-full bg-emerald-500 text-white py-2 rounded-lg hover:bg-emerald-600 transition duration-300">
+                    Submit
+                </button>
+            </div>
+
+            <div class="text-center">
+                <a href="#" id="vcoinsLink" onclick="showVCoins()" class="text-emerald-600 font-semibold hidden">
+                    Use V-Coins <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- V-Coins Page -->
+        <div id="vcoinsPage" class="max-w-md mx-auto p-6 hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-emerald-600">Your V-Coins Wallet</h2>
+                    <p class="text-4xl font-bold mt-4" id="coinBalance">0</p>
+                    <p class="text-gray-600 mt-2">V-Coins Available</p>
+                </div>
+                <div class="border-t pt-4">
+                    <h3 class="font-semibold mb-2">Monthly Statistics</h3>
+                    <p class="text-gray-600">Submissions this month: <span id="submissionCount">0</span>/5</p>
+                </div>
+                <button onclick="goBack()" class="w-full bg-emerald-500 text-white py-2 rounded-lg mt-4 hover:bg-emerald-600 transition duration-300">
+                    Back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userDatabase = {};
+        const MONTHLY_LIMIT = 5;
+        const COINS_PER_SUBMISSION = 10;
+
+        function isValidUSN(usn) {
+            return /^4VV23EC(?:0\d\d|1[0-9]\d|200)$/.test(usn);
+        }
+
+        function submitWaste() {
+            const usn = document.getElementById('usn').value.trim();
+            
+            if (!isValidUSN(usn)) {
+                alert('Please enter a valid USN (4VV23EC001-4VV23EC200)');
+                return;
+            }
+
+            if (!userDatabase[usn]) {
+                userDatabase[usn] = {
+                    coins: 0,
+                    submissions: 0,
+                    lastResetMonth: new Date().getMonth()
+                };
+            }
+
+            const currentMonth = new Date().getMonth();
+            if (currentMonth !== userDatabase[usn].lastResetMonth) {
+                userDatabase[usn].submissions = 0;
+                userDatabase[usn].lastResetMonth = currentMonth;
+            }
+
+            if (userDatabase[usn].submissions >= MONTHLY_LIMIT) {
+                alert('Monthly submission limit reached! You can submit again next month.');
+                return;
+            }
+
+            userDatabase[usn].coins += COINS_PER_SUBMISSION;
+            userDatabase[usn].submissions++;
+
+            alert('Waste successfully dumped! 10 V-coins have been credited to your wallet.');
+            document.getElementById('vcoinsLink').classList.remove('hidden');
+            updateVCoinsDisplay(usn);
+        }
+
+        function showVCoins() {
+            const usn = document.getElementById('usn').value.trim();
+            if (!userDatabase[usn]) {
+                alert('Please submit waste first!');
+                return;
+            }
+
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('vcoinsPage').classList.remove('hidden');
+            updateVCoinsDisplay(usn);
+        }
+
+        function updateVCoinsDisplay(usn) {
+            document.getElementById('coinBalance').textContent = userDatabase[usn].coins;
+            document.getElementById('submissionCount').textContent = userDatabase[usn].submissions;
+        }
+
+        function goBack() {
+            document.getElementById('mainPage').classList.remove('hidden');
+            document.getElementById('vcoinsPage').classList.add('hidden');
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
